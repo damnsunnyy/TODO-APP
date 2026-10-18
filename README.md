@@ -2,6 +2,9 @@
 
 A classroom friendly CRUD app built with React + Vite, Django REST Framework, and SQLite. React manages the interface and sends HTTP requests with `fetch()`. Django validates each request and reads or writes Todo records in SQLite.
 
+**Live browser demo:** https://damnsunnyy.github.io/TODO-APP/  
+The Pages demo uses browser `localStorage` so its create, edit, complete, search, and delete flows work without a server. Those demo tasks stay in the current browser and are separate from the SQLite-backed API mode used locally.
+
 ## Features
 
 - Create, list, edit, complete, and delete tasks
@@ -39,6 +42,10 @@ npm run dev
 ```
 
 Open `http://localhost:3000`. Vite proxies `/api` requests to Django. CORS is also configured for the local development hostnames.
+
+## GitHub Pages deployment
+
+The `deploy-pages.yml` workflow builds the React client with `VITE_DEMO_MODE=true` and publishes `frontend/dist` whenever changes reach `main`. The Django API remains a local deployment and is not hosted by GitHub Pages.
 
 ## API endpoints
 

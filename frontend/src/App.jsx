@@ -2,6 +2,52 @@ import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 
 const API_URL = "/api/todos/";
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
+const DEMO_STORAGE_KEY = "todo-app-demo-items";
+
+function readDemoTodos() {
+  try {
+    const items = JSON.parse(window.localStorage.getItem(DEMO_STORAGE_KEY) || "[]");
+    return Array.isArray(items) ? items : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeDemoTodos(items) {
+  window.localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(items));
+  return items;
+}
+
+async function listTodos() {
+  return DEMO_MODE ? readDemoTodos() : request(API_URL);
+}
+
+async function createTodo(title) {
+  if (!DEMO_MODE) return request(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ title, completed: false }),
+  });
+  const todo = { id: crypto.randomUUID(), title, completed: false, created_at: new Date().toISOString() };
+  writeDemoTodos([todo, ...readDemoTodos()]);
+  return todo;
+}
+
+async function updateTodo(id, changes) {
+  if (!DEMO_MODE) return request(`${API_URL}${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(changes),
+  });
+  const updated = readDemoTodos().map((todo) => todo.id === id ? { ...todo, ...changes } : todo);
+  writeDemoTodos(updated);
+  return updated.find((todo) => todo.id === id);
+}
+
+async function removeTodo(id) {
+  if (!DEMO_MODE) return request(`${API_URL}${id}/`, { method: "DELETE" });
+  writeDemoTodos(readDemoTodos().filter((todo) => todo.id !== id));
+  return null;
+}
 
 async function request(url, options) {
   const response = await fetch(url, {
@@ -35,7 +81,7 @@ function App() {
   async function fetchTodos() {
     try {
       setError("");
-      const data = await request(API_URL);
+      const data = await listTodos();
       setTodos(data);
     } catch (err) {
       setError(err.message);
@@ -54,10 +100,7 @@ function App() {
     setSaving(true);
     setError("");
     try {
-      const todo = await request(API_URL, {
-        method: "POST",
-        body: JSON.stringify({ title: title.trim(), completed: false }),
-      });
+      const todo = await createTodo(title.trim());
       setTodos((current) => [todo, ...current]);
       setTitle("");
     } catch (err) {
@@ -70,10 +113,7 @@ function App() {
   async function toggleTodo(todo) {
     setError("");
     try {
-      const updated = await request(`${API_URL}${todo.id}/`, {
-        method: "PATCH",
-        body: JSON.stringify({ completed: !todo.completed }),
-      });
+      const updated = await updateTodo(todo.id, { completed: !todo.completed });
       setTodos((current) => current.map((item) => item.id === updated.id ? updated : item));
     } catch (err) {
       setError(err.message);
@@ -83,7 +123,7 @@ function App() {
   async function deleteTodo(id) {
     setError("");
     try {
-      await request(`${API_URL}${id}/`, { method: "DELETE" });
+      await removeTodo(id);
       setTodos((current) => current.filter((todo) => todo.id !== id));
       if (editingId === id) cancelEditing();
     } catch (err) {
@@ -106,10 +146,7 @@ function App() {
     if (!editingTitle.trim()) return;
     setError("");
     try {
-      const updated = await request(`${API_URL}${id}/`, {
-        method: "PATCH",
-        body: JSON.stringify({ title: editingTitle.trim() }),
-      });
+      const updated = await updateTodo(id, { title: editingTitle.trim() });
       setTodos((current) => current.map((todo) => todo.id === updated.id ? updated : todo));
       cancelEditing();
     } catch (err) {
@@ -136,7 +173,8 @@ function App() {
           <div>
             <p className="eyebrow">A little more focus, every day</p>
             <h1 id="page-title">My Todo List</h1>
-            <p className="subtitle">Plan your day, one task at a time.</p>
+          <p className="subtitle">Plan your day, one task at a time.</p>
+          {DEMO_MODE && <p className="demo-note">Browser demo · tasks stay on this device</p>}
           </div>
         </header>
 
