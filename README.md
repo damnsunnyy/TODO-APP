@@ -1,8 +1,9 @@
 # Full-Stack Todo Application
 
+**Live demo:** [https://damnsunnyy.github.io/TODO-APP/](https://damnsunnyy.github.io/TODO-APP/)
+
 A classroom friendly CRUD app built with React + Vite, Django REST Framework, and SQLite. React manages the interface and sends HTTP requests with `fetch()`. Django validates each request and reads or writes Todo records in SQLite.
 
-**Live browser demo:** https://damnsunnyy.github.io/TODO-APP/  
 The Pages demo uses browser `localStorage` so its create, edit, complete, search, and delete flows work without a server. Those demo tasks stay in the current browser and are separate from the SQLite-backed API mode used locally.
 
 ## Features
