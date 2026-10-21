@@ -4,7 +4,12 @@
 
 A classroom friendly CRUD app built with React + Vite, Django REST Framework, and SQLite. React manages the interface and sends HTTP requests with `fetch()`. Django validates each request and reads or writes Todo records in SQLite.
 
-The Pages demo uses browser `localStorage` so its create, edit, complete, search, and delete flows work without a server. Those demo tasks stay in the current browser and are separate from the SQLite-backed API mode used locally.
+## Data persistence
+
+| Run mode | Storage | Where the data stays |
+| --- | --- | --- |
+| GitHub Pages demo | Browser `localStorage` | In the current browser; no server is required |
+| Local React + Django app | SQLite | In `backend/todo_data.sqlite3`, served through the Django API |
 
 ## Features
 
